@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고생대의 환경과 생물 - 통합과학 발표</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paleoDark: '#0b1120',
+                        paleoCard: '#1e293b',
+                        paleoAccent: '#38bdf8',
+                        paleoGreen: '#10b981',
+                        paleoRed: '#ef4444',
+                        paleoGold: '#f59e0b'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #0b1120;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1120;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Volcano Screen Shake Effect */
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-3px, 3px) rotate(-0.5deg); }
+            40% { transform: translate(3px, -2px) rotate(0.5deg); }
+            60% { transform: translate(-2px, -3px) rotate(-0.2deg); }
+            80% { transform: translate(2px, 2px) rotate(0.3deg); }
+        }
+        .volcano-active {
+            animation: shake 0.3s infinite ease-in-out;
+        }
+
+        /* Card Flip Style */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Fog Animation */
+        @keyframes fogMove {
+            0% { transform: translateX(-10%); opacity: 0.3; }
+            50% { transform: translateX(10%); opacity: 0.6; }
+            100% { transform: translateX(-10%); opacity: 0.3; }
+        }
+        .fog-layer {
+            animation: fogMove 12s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-paleoDark text-slate-100 min-h-screen">
+
+    <!-- HEADER -->
+    <header class="relative bg-slate-900 border-b border-slate-800 py-8 px-4 text-center shadow-2xl overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-emerald-900/20 to-amber-900/20 pointer-events-none"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <span class="px-3 py-1 bg-cyan-900/60 text-cyan-300 text-xs font-semibold rounded-full border border-cyan-500/30 uppercase tracking-widest mb-3 inline-block">
+                고등학교 통합과학 프로젝트
+            </span>
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400">
+                고생대의 환경과 생물
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base mt-2">
+                5억 4100만 년 전부터 2억 5200만 년 전까지의 대기·해양, 기후, 수륙분포 및 생명체의 대폭발과 대멸종
+            </p>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-16">
+
+        <!-- SECTION 1: 시대 구분 (지구 역사 비율 원그래프) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-700/50 pb-3">
+                <i class="fa-solid fa-chart-pie text-cyan-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">1. 지질 시대 구분 및 고생대 위치</h2>
+                    <p class="text-slate-400 text-xs">지구 전체 역사(46억 년) 중 고생대의 지속 기간과 위치</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-5 flex justify-center relative">
+                    <div class="w-full max-w-[320px] aspect-square relative">
+                        <canvas id="geologicalTimeChart"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-cyan-400 font-bold text-lg">고생대 (Paleozoic Era)</span>
+                            <span class="text-xs bg-cyan-950 text-cyan-300 px-2.5 py-1 rounded-full border border-cyan-800">전체 지질 시대의 약 6.3%</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            약 <strong>5억 4,100만 년 전</strong>부터 <strong>2억 5,200만 년 전</strong>까지 약 2억 8,900만 년간 지속되었습니다. 선캄브리아 시대 이후 생물계의 급격한 다각화가 이루어졌습니다.
+                        </p>
+                    </div>
+
+                    <div class="bg-emerald-950/30 p-4 rounded-xl border border-emerald-800/40">
+                        <h3 class="font-bold text-emerald-400 text-base mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> 캄브리아기 생물 대폭발 (Cambrian Explosion)
+                        </h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            고생대 초기, 단기간 동안 무척추동물의 거의 모든 주요 문(Phylum)이 지구상에 출현했습니다. 단단한 껍데기나 골격을 가진 생명체가 등장하여 화석 보존율이 급격히 증가했습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 기후 (빙하기 시뮬레이션) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3 mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-icicles text-cyan-300 text-2xl"></i>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-100">2. 고생대의 기후와 빙하기 연출</h2>
+                        <p class="text-slate-400 text-xs">고생대 전반의 따뜻한 기후와 오르도비스기·페름기 말 빙하기 시뮬레이션</p>
+                    </div>
+                </div>
+                <button id="toggleIceAgeBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-2 rounded-xl transition text-sm flex items-center gap-2 shadow-lg shadow-cyan-900/50">
+                    <i class="fa-solid fa-snowflake"></i> <span id="iceBtnText">빙하기 확장 연출</span>
+                </button>
+            </div>
+
+            <!-- Ice Age Canvas Graphic -->
+            <div id="glacierContainer" class="relative w-full h-80 rounded-xl overflow-hidden border border-cyan-900/50 bg-slate-950 flex flex-col justify-end">
+                <!-- Sky Background -->
+                <div id="iceSky" class="absolute inset-0 bg-gradient-to-b from-slate-900 via-sky-950 to-blue-900 transition-colors duration-1000"></div>
+                
+                <!-- Fog Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-white/5 to-cyan-500/10 fog-layer pointer-events-none"></div>
+
+                <!-- Icebergs SVG -->
+                <div class="relative z-10 w-full h-48 flex items-end justify-between px-4 pointer-events-none">
+                    <!-- Left Iceberg -->
+                    <svg class="w-1/3 h-full text-cyan-200/80 transition-all duration-1000 transform origin-bottom" id="icebergLeft" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polygon points="0,100 20,40 50,70 80,20 100,100" fill="currentColor" opacity="0.8"/>
+                        <polygon points="20,40 50,70 80,20 100,100" fill="#bae6fd" opacity="0.4"/>
+                    </svg>
+                    <!-- Center Iceberg -->
+                    <svg class="w-1/2 h-5/6 text-sky-100/90 transition-all duration-1000 transform origin-bottom" id="icebergCenter" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polygon points="10,100 45,10 70,50 90,15 100,100" fill="currentColor"/>
+                        <polygon points="45,10 70,50 90,15 100,100" fill="#e0f2fe" opacity="0.5"/>
+                    </svg>
+                    <!-- Right Iceberg -->
+                    <svg class="w-1/3 h-2/3 text-cyan-300/70 transition-all duration-1000 transform origin-bottom" id="icebergRight" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polygon points="0,100 30,30 65,60 100,100" fill="currentColor"/>
+                    </svg>
+                </div>
+
+                <!-- Sea Water Layer -->
+                <div id="iceSea" class="relative z-20 w-full h-20 bg-gradient-to-b from-cyan-600/60 to-blue-950 transition-colors duration-1000 backdrop-blur-xs flex items-center justify-center">
+                    <span id="iceStatusText" class="text-cyan-100 font-bold text-sm tracking-widest bg-slate-900/60 px-4 py-1.5 rounded-full border border-cyan-400/40">
+                        온난한 해양 환경 (기온 높음 / 빙하 축소)
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/80 text-sm">
+                    <h3 class="font-bold text-cyan-300 mb-1">온난한 전반기 기후</h3>
+                    <p class="text-slate-300 leading-relaxed">
+                        고생대 대부분의 기간 동안은 전 지구적으로 따뜻하고 습윤한 기후가 유지되어 해수면이 높았고 온난한 얕은 바다가 넓게 형성되었습니다.
+                    </p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/80 text-sm">
+                    <h3 class="font-bold text-sky-300 mb-1">오르도비스기 말 & 페름기 말 빙하기</h3>
+                    <p class="text-slate-300 leading-relaxed">
+                        대륙의 이동과 대기 성분 변화로 인해 오르도비스기 말과 페름기 말에는 대규모 빙하기가 찾아와 해수면이 낮아지고 대멸종을 유발했습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 대기 및 해양 환경 (공기 입자 분자 운동 모형) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-6">
+                <i class="fa-solid fa-atom text-emerald-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">3. 대기 및 해양 환경 (기체 분자 운동 모형)</h2>
+                    <p class="text-slate-400 text-xs">시대별 대기 성분(CO₂, O₂, N₂) 분자 운동 시뮬레이션 및 오존층 형성</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 relative">
+                    <!-- Molecule Simulation Canvas -->
+                    <div class="relative w-full h-80 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 shadow-inner">
+                        <canvas id="moleculeCanvas" class="w-full h-full block"></canvas>
+                        <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700 text-xs flex gap-4">
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> CO₂ (이산화탄소)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-cyan-400 inline-block"></span> O₂ (산소)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-400 inline-block"></span> N₂ (질소)</span>
+                        </div>
+                    </div>
+
+                    <!-- Period Selector Buttons -->
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <button onclick="setAtmosphere('early')" class="atmo-btn bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex-1">
+                            고생대 초기 (CO₂ 높음 / O₂ 낮음)
+                        </button>
+                        <button onclick="setAtmosphere('mid')" class="atmo-btn bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex-1">
+                            석탄기 (O₂ 급증 35% / 거대식물)
+                        </button>
+                        <button onclick="setAtmosphere('late')" class="atmo-btn bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex-1">
+                            페름기 말 (화산 가스 / 산소 감소)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 space-y-3 flex flex-col justify-between">
+                    <div id="atmoInfoCard" class="bg-slate-900/70 p-4 rounded-xl border border-slate-700 h-full text-sm space-y-2">
+                        <h3 id="atmoTitle" class="font-bold text-emerald-400 text-base">고생대 초기 대기</h3>
+                        <p id="atmoDesc" class="text-slate-300 text-xs leading-relaxed">
+                            이산화탄소 온실효과로 기온이 따뜻했습니다. 식물 진화 이전으로 대기 중 산소 농도는 현재보다 낮았습니다.
+                        </p>
+                        <hr class="border-slate-800 my-2">
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between"><span class="text-slate-400">산소(O₂) 농도:</span> <span id="o2Level" class="font-bold text-cyan-300">약 12~15%</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">오존층(O₃):</span> <span id="ozoneLevel" class="font-bold text-emerald-400">형성 시작 단계</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">해수면:</span> <span id="seaLevel" class="font-bold text-amber-300">높음 (넓은 대륙붕)</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-950/30 p-3.5 rounded-xl border border-blue-800/40 text-xs">
+                        <span class="font-bold text-blue-300 block mb-1">💡 오존층 축적의 중요성</span>
+                        광합성 생물의 증가로 산소가 공급되어 오존층(O₃)이 두꺼워졌고, 자외선이 차단되면서 생명체가 육상으로 진출할 수 있게 되었습니다.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: 수륙 분포 (판게아 형성 애니메이션) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-6">
+                <i class="fa-solid fa-earth-americas text-amber-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">4. 고생대의 수륙 분포와 대륙 이동</h2>
+                    <p class="text-slate-400 text-xs">초기 분리된 대륙들이 합쳐져 페름기 초대륙 판게아(Pangaea)를 형성하는 과정</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-7">
+                    <!-- World Map Oval Frame -->
+                    <div class="relative w-full aspect-[2/1] max-h-80 bg-slate-950 rounded-[100px] border-4 border-slate-700 overflow-hidden shadow-2xl flex items-center justify-center p-4">
+                        <!-- Ocean Texture -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-900 to-indigo-950"></div>
+                        <div class="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+
+                        <!-- Continents Container -->
+                        <div id="continentsContainer" class="relative z-10 w-full h-full transition-all duration-1000">
+                            <!-- Continent A (Laurentia / Gondwana components) -->
+                            <svg id="contA" class="absolute w-28 h-20 text-amber-700/80 transition-all duration-1000 transform translate-x-10 translate-y-8" viewBox="0 0 100 100">
+                                <path d="M20,30 Q40,5 70,20 Q95,50 70,80 Q30,95 10,60 Z" fill="currentColor" stroke="#f59e0b" stroke-width="2"/>
+                            </svg>
+                            <!-- Continent B -->
+                            <svg id="contB" class="absolute w-32 h-24 text-emerald-800/80 transition-all duration-1000 transform translate-x-60 translate-y-28" viewBox="0 0 100 100">
+                                <path d="M10,20 Q50,0 80,30 Q100,70 60,90 Q10,80 5,40 Z" fill="currentColor" stroke="#10b981" stroke-width="2"/>
+                            </svg>
+                            <!-- Continent C -->
+                            <svg id="contC" class="absolute w-24 h-20 text-teal-800/80 transition-all duration-1000 transform translate-x-36 translate-y-4" viewBox="0 0 100 100">
+                                <path d="M30,10 Q80,20 85,60 Q60,90 20,70 Q0,40 30,10 Z" fill="currentColor" stroke="#14b8a6" stroke-width="2"/>
+                            </svg>
+                        </div>
+
+                        <!-- Pangaea Label Overlay -->
+                        <div id="pangaeaBadge" class="absolute bottom-4 bg-amber-950/80 border border-amber-500/50 text-amber-200 text-xs font-bold px-3 py-1 rounded-full opacity-0 transition-opacity duration-500 z-20">
+                            초대륙 판게아 (Pangaea) 완성
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-4 mt-4">
+                        <button onclick="animateDrift('early')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2 rounded-xl border border-slate-600 transition">
+                            고생대 초기 (대륙 분리)
+                        </button>
+                        <button onclick="animateDrift('late')" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-lg shadow-amber-900/40">
+                            고생대 말기 (판게아 합체)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 space-y-4 text-sm">
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                        <h3 class="font-bold text-amber-400 mb-1">판게아(Pangaea)의 형성 과정</h3>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            고생대 초기에는 로디니아 분열 이후 여러 대륙으로 갈라져 있었으나, 플레이트 운동으로 대륙들이 점점 접근하여 페름기에 하나의 거대한 <strong>초대륙 판게아</strong>를 형성했습니다.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                        <h3 class="font-bold text-cyan-300 mb-1">수륙 분포가 기후와 생물에 미친 영향</h3>
+                        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                            <li>판게아 형성으로 해안선 길이가 급격히 감소함.</li>
+                            <li>대륙 내부에 건조한 사막 기후가 광범위하게 형성됨.</li>
+                            <li>얕은 바다(대륙붕)의 면적이 줄어들어 해양 생물의 서식지 축소.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: 고생대 대표 동물 (삼엽충 & 디메트로돈) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-6">
+                <i class="fa-solid fa-dragon text-indigo-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">5. 고생대의 대표 동물</h2>
+                    <p class="text-slate-400 text-xs">해양 무척추동물(삼엽충)과 육상 파충류 계통(디메트로돈)의 모형 및 생태</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Marine Animal: Trilobite -->
+                <div class="bg-slate-900/80 rounded-xl p-5 border border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <span class="text-xs bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800">해양 무척추동물</span>
+                                <h3 class="text-xl font-bold text-cyan-300 mt-1">삼엽충 (Trilobite)</h3>
+                            </div>
+                            <span class="text-xs text-slate-400">캄브리아기 ~ 페름기</span>
+                        </div>
+
+                        <!-- Swimming Trilobite SVG Animation -->
+                        <div class="w-full h-40 bg-slate-950 rounded-lg flex items-center justify-center relative overflow-hidden border border-slate-800 my-3">
+                            <div class="absolute inset-0 bg-blue-950/30"></div>
+                            <svg class="w-24 h-24 text-cyan-500 animate-bounce transition-transform duration-500" viewBox="0 0 100 100">
+                                <!-- Trilobite Shield Outline -->
+                                <path d="M50,10 Q80,10 85,35 Q85,80 50,95 Q15,80 15,35 Q20,10 50,10 Z" fill="#0e7490" stroke="#38bdf8" stroke-width="3"/>
+                                <!-- Trilobite Segments -->
+                                <line x1="20" y1="35" x2="80" y2="35" stroke="#38bdf8" stroke-width="2"/>
+                                <line x1="22" y1="48" x2="78" y2="48" stroke="#38bdf8" stroke-width="2"/>
+                                <line x1="25" y1="60" x2="75" y2="60" stroke="#38bdf8" stroke-width="2"/>
+                                <line x1="30" y1="72" x2="70" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                                <!-- Axial Lobes -->
+                                <ellipse cx="50" cy="50" rx="12" ry="35" fill="#155e75"/>
+                                <!-- Eyes -->
+                                <circle cx="32" cy="28" r="4" fill="#fef08a"/>
+                                <circle cx="68" cy="28" r="4" fill="#fef08a"/>
+                            </svg>
+                        </div>
+
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            몸이 세 로브(중축, 좌우 늑골)로 나누어지며 단단한 머리 껍데기를 가집니다. 얕은 바다 바닥을 기어다니며 유기물을 섭식했습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Terrestrial Animal: Dimetrodon -->
+                <div class="bg-slate-900/80 rounded-xl p-5 border border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <span class="text-xs bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800">육상 단궁류 (반룡류)</span>
+                                <h3 class="text-xl font-bold text-amber-400 mt-1">디메트로돈 (Dimetrodon)</h3>
+                            </div>
+                            <span class="text-xs text-slate-400">페름기</span>
+                        </div>
+
+                        <!-- Walking Dimetrodon SVG Graphic -->
+                        <div class="w-full h-40 bg-slate-950 rounded-lg flex items-center justify-center relative overflow-hidden border border-slate-800 my-3">
+                            <div class="absolute inset-0 bg-amber-950/10"></div>
+                            <svg class="w-40 h-28 text-amber-600" viewBox="0 0 160 100">
+                                <!-- 背帆 (Sail) -->
+                                <path d="M40,60 Q70,5 110,60 Z" fill="#b45309" opacity="0.8" stroke="#f59e0b" stroke-width="2"/>
+                                <line x1="50" y1="55" x2="55" y2="25" stroke="#f59e0b" stroke-width="1.5"/>
+                                <line x1="65" y1="52" x2="72" y2="12" stroke="#f59e0b" stroke-width="1.5"/>
+                                <line x1="80" y1="52" x2="85" y2="10" stroke="#f59e0b" stroke-width="1.5"/>
+                                <line x1="95" y1="55" x2="98" y2="25" stroke="#f59e0b" stroke-width="1.5"/>
+                                <!-- Body -->
+                                <ellipse cx="75" cy="65" rx="38" ry="14" fill="#78350f"/>
+                                <!-- Head -->
+                                <path d="M110,55 L135,58 L130,70 L110,68 Z" fill="#78350f"/>
+                                <!-- Tail -->
+                                <path d="M38,65 Q15,68 5,80" stroke="#78350f" stroke-width="6" fill="none"/>
+                                <!-- Legs -->
+                                <path d="M50,75 L45,90 M60,75 L65,90 M90,75 L85,90 M105,75 L110,90" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            공룡이 아닌 포유류의 조상 계통인 단궁류에 속합니다. 등 뒤의 거대한 돛(Sail)은 체온 조절 및 서식지 적응에 사용되었습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: 고생대 대표 식물 (쿡소니아 관다발 발육) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3 mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-seedling text-emerald-400 text-2xl"></i>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-100">6. 최초의 육상 식물 (쿡소니아, Cooksonia)</h2>
+                        <p class="text-slate-400 text-xs">실루리아기 최초 관다발 식물의 발생 및 줄기 성취 애니메이션</p>
+                    </div>
+                </div>
+                <button onclick="growPlant()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-1.5 rounded-xl transition text-xs">
+                    <i class="fa-solid fa-arrows-up-to-line"></i> 성취 발육 재실행
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-5 bg-slate-950 h-64 rounded-xl border border-slate-800 flex items-end justify-center p-4 relative overflow-hidden">
+                    <!-- Soil Level -->
+                    <div class="absolute bottom-0 inset-x-0 h-8 bg-amber-950/80 border-t border-amber-800"></div>
+
+                    <!-- Plant Growth SVG -->
+                    <svg id="plantSvg" class="relative z-10 w-48 h-56 text-emerald-500 overflow-visible" viewBox="0 0 100 120">
+                        <!-- Main Trunk -->
+                        <path id="stemMain" d="M50,120 L50,80" stroke="currentColor" stroke-width="4" fill="none" class="transition-all duration-1000"/>
+                        <!-- Left Branch -->
+                        <path id="stemLeft" d="M50,80 Q30,60 25,40" stroke="currentColor" stroke-width="3" fill="none" class="transition-all duration-1000"/>
+                        <!-- Right Branch -->
+                        <path id="stemRight" d="M50,80 Q70,60 75,40" stroke="currentColor" stroke-width="3" fill="none" class="transition-all duration-1000"/>
+                        <!-- Sporangia (포자낭) -->
+                        <circle id="sporeL" cx="25" cy="36" r="6" fill="#f59e0b" class="transition-all duration-700 delay-500 opacity-0"/>
+                        <circle id="sporeR" cx="75" cy="36" r="6" fill="#f59e0b" class="transition-all duration-700 delay-500 opacity-0"/>
+                    </svg>
+                </div>
+
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 text-sm">
+                        <h3 class="font-bold text-emerald-400 mb-1">관다발 식물의 혁신성</h3>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            실루리아기에 등장한 쿡소니아(Cooksonia)는 최초로 **관다발(물관·체관)**을 형성한 식물입니다. 물과 영양분을 위로 수송할 수 있게 되어 뿌리와 잎이 체계화되지 않았음에도 육상 진출에 성공했습니다.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 text-sm">
+                        <h3 class="font-bold text-teal-300 mb-1">석탄기 거대 양치식물 숲</h3>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            이후 석탄기에는 봉인목(Sigillaria), 인목(Lepidodendron) 같은 거대한 양치식물들이 습지 숲을 이루었고, 이들이 매몰되어 오늘날의 **석탄 자원**이 되었습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: 대형 표준화석 (삼엽충 & 방추충) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-6">
+                <i class="fa-solid fa-stamp text-cyan-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">7. 고생대 대형 표준화석 (Standard Fossils)</h2>
+                    <p class="text-slate-400 text-xs">시대를 판단하는 정밀 가이드화석: 삼엽충과 방추충(푸술리나)의 기어가는 그래픽 모형</p>
+                </div>
+            </div>
+
+            <!-- Standard Fossil Requirements Box -->
+            <div class="bg-cyan-950/30 p-4 rounded-xl border border-cyan-800/40 mb-6 text-xs text-slate-300 grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700">
+                    <span class="font-bold text-cyan-300 block mb-1">① 생존 기간이 짧을 것</span>
+                    특정 지질 시대에만 순간적으로 크게 번성
+                </div>
+                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700">
+                    <span class="font-bold text-cyan-300 block mb-1">② 지리적 분포가 넓을 것</span>
+                    전 지구적인 해양/육상에 광범위 분포
+                </div>
+                <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700">
+                    <span class="font-bold text-cyan-300 block mb-1">③ 개체 수가 많을 것</span>
+                    화석으로 발견될 확률이 매우 높음
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Trilobite Fossil Model -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-700 relative overflow-hidden group">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-lg text-cyan-300">삼엽충 (Trilobite)</h3>
+                        <span class="text-xs bg-cyan-900 text-cyan-200 px-2 py-0.5 rounded">고생대 전 기간</span>
+                    </div>
+
+                    <div class="w-full h-48 bg-slate-950 rounded-lg flex items-center justify-center p-2 relative">
+                        <!-- Crawling SVG Animation -->
+                        <svg class="w-36 h-36 text-amber-600/90 hover:scale-105 transition-transform duration-300 cursor-pointer" viewBox="0 0 100 100">
+                            <!-- Fossil Texture Details -->
+                            <ellipse cx="50" cy="50" rx="40" ry="45" fill="#2d221c" stroke="#78350f" stroke-width="2"/>
+                            <!-- Segments -->
+                            <path d="M20,30 Q50,20 80,30 M15,42 Q50,32 85,42 M15,54 Q50,44 85,54 M20,66 Q50,56 80,66 M25,78 Q50,68 75,78" stroke="#d97706" stroke-width="2.5" fill="none"/>
+                            <ellipse cx="50" cy="50" rx="10" ry="38" fill="#451a03"/>
+                        </svg>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-3">
+                        고생대 초기에 나타나 전 세계의 바다를 지배했던 대표적 표준화석입니다.
+                    </p>
+                </div>
+
+                <!-- Fusulinid (방추충) Fossil Model -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-700 relative overflow-hidden group">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-lg text-amber-300">방추충 (Fusulinid)</h3>
+                        <span class="text-xs bg-amber-900 text-amber-200 px-2 py-0.5 rounded">석탄기 ~ 페름기</span>
+                    </div>
+
+                    <div class="w-full h-48 bg-slate-950 rounded-lg flex items-center justify-center p-2 relative">
+                        <!-- Fusulinid Rice/Spindle Shape SVG -->
+                        <svg class="w-44 h-28 text-amber-200 hover:scale-105 transition-transform duration-300 cursor-pointer" viewBox="0 0 120 60">
+                            <!-- Spindle Body -->
+                            <ellipse cx="60" cy="30" rx="50" ry="20" fill="#78350f" stroke="#f59e0b" stroke-width="2"/>
+                            <!-- Internal Spiral Layer Rings -->
+                            <ellipse cx="60" cy="30" rx="40" ry="15" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 2"/>
+                            <ellipse cx="60" cy="30" rx="28" ry="10" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+                            <ellipse cx="60" cy="30" rx="14" ry="5" fill="#fef08a"/>
+                        </svg>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-3">
+                        쌀알 모양을 한 단세포 유공충 생물로, 고생대 말기(석탄기-페름기) 바다의 표준화석입니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: 고생대 말 대멸종 사건 (화산 폭발 시뮬레이션) -->
+        <section id="volcanoSection" class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3 mb-6 relative z-10">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-volcano text-red-500 text-2xl"></i>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-100">8. 고생대 말 대멸종 (Permian Extinction)</h2>
+                        <p class="text-slate-400 text-xs">지구 역사상 최대 규모의 대멸종 사건과 시베리아 트랩 화산 폭발</p>
+                    </div>
+                </div>
+                <button id="volcanoTriggerBtn" onclick="triggerVolcanoEruption()" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl transition text-xs flex items-center gap-2 shadow-lg shadow-red-900/50">
+                    <i class="fa-solid fa-fire"></i> 대규모 화산 폭발 가동
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+                <div class="lg:col-span-7">
+                    <!-- Volcano Canvas Animation Frame -->
+                    <div class="relative w-full h-80 bg-slate-950 rounded-xl overflow-hidden border border-red-900/50 shadow-2xl flex items-end">
+                        <!-- Lava Glow Background -->
+                        <div id="lavaGlow" class="absolute inset-0 bg-gradient-to-t from-red-950/80 via-orange-950/30 to-transparent transition-opacity duration-500 opacity-40"></div>
+
+                        <!-- Volcano Mountain SVG -->
+                        <svg class="w-full h-full text-slate-900 absolute inset-0" viewBox="0 0 200 100" preserveAspectRatio="none">
+                            <polygon points="0,100 70,30 130,30 200,100" fill="#18181b"/>
+                            <!-- Lava River Lines -->
+                            <path d="M90,30 L80,60 L70,100 M110,30 L120,65 L135,100" stroke="#ef4444" stroke-width="3" fill="none" id="lavaFlows"/>
+                        </svg>
+
+                        <!-- Eruption Smoke & Particles Container -->
+                        <div id="eruptionParticles" class="absolute inset-x-0 top-0 h-48 pointer-events-none"></div>
+
+                        <!-- Species Extinction Fade-out Layer -->
+                        <div id="extinctionLayer" class="absolute inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center opacity-0 transition-opacity duration-1000">
+                            <div class="text-center p-4">
+                                <span class="text-red-500 font-extrabold text-2xl block mb-1">해양 생물종약 95% 멸종</span>
+                                <span class="text-slate-300 text-xs">삼엽충, 방추충 등 수많은 고생대 대표 생물 완전히 자취 감춤</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 space-y-3 text-xs">
+                    <div class="bg-red-950/30 p-4 rounded-xl border border-red-800/40">
+                        <h3 class="font-bold text-red-400 text-sm mb-1">시베리아 트랩 (Siberian Traps) 폭발</h3>
+                        <p class="text-slate-300 leading-relaxed">
+                            페름기 말, 대규모 화산 분출로 이산화탄소와 메탄가스가 폭발적으로 기화되어 극심한 **지구 온난화, 해양 산소 결핍, 산성비**가 초래되었습니다.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                        <h3 class="font-bold text-amber-300 text-sm mb-1">판게아 형성과의 연쇄 작용</h3>
+                        <p class="text-slate-300 leading-relaxed">
+                            초대륙 판게아 형성으로 해안선 얕은 바다가 축소된 상태에서 화산 폭발로 인한 환경 변화가 더해져 지구 생명체 역사상 가장 치명적인 대멸종이 발생했습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 9: 시상화석과 환경 추론 (고사리 & 산호 플립 카드) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-6">
+                <i class="fa-solid fa-leaf text-emerald-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">9. 시상화석과 과거 환경 추론</h2>
+                    <p class="text-slate-400 text-xs">당시의 서식 환경을 알려주는 시상화석(Index Environmental Fossils) 카드 (클릭하여 뒤집기)</p>
+                </div>
+            </div>
+
+            <!-- Comparison Box: Index vs Environmental Fossils -->
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="border-l-4 border-cyan-400 pl-3">
+                    <span class="font-bold text-cyan-300 text-sm block">표준화석 (Index Fossil)</span>
+                    <p class="text-slate-300 mt-1">생존 기간이 짧고 분포 면적이 넓음 $\rightarrow$ **시대를 판단** (예: 삼엽충, 방추충)</p>
+                </div>
+                <div class="border-l-4 border-emerald-400 pl-3">
+                    <span class="font-bold text-emerald-300 text-sm block">시상화석 (Environmental Fossil)</span>
+                    <p class="text-slate-300 mt-1">생존 기간이 길고 특정 환경에만 서식 $\rightarrow$ **과거 환경을 판단** (예: 고사리, 산호)</p>
+                </div>
+            </div>
+
+            <!-- Interactive Flip Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1: Fern (고사리) -->
+                <div class="perspective-1000 h-72 cursor-pointer" onclick="flipCard(this)">
+                    <div class="relative w-full h-full duration-700 transform-style-3d card-inner">
+                        <!-- Front -->
+                        <div class="absolute inset-0 bg-slate-900 rounded-xl border border-emerald-700/60 p-5 flex flex-col justify-between backface-hidden">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">육상 시상화석</span>
+                                <span class="text-xs text-slate-400">클릭하여 환경 확인 🔄</span>
+                            </div>
+
+                            <!-- SVG Fern -->
+                            <div class="flex justify-center my-2">
+                                <svg class="w-28 h-28 text-emerald-400" viewBox="0 0 100 100">
+                                    <path d="M50,90 Q50,10 90,10" stroke="currentColor" stroke-width="3" fill="none"/>
+                                    <path d="M50,70 Q25,60 20,50" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M50,55 Q75,45 80,35" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M50,40 Q30,30 25,20" stroke="currentColor" stroke-width="2" fill="none"/>
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-emerald-300 text-center">고사리 (Fern)</h3>
+                                <p class="text-center text-xs text-slate-400 mt-1">고생대 석탄기에 대규모로 번성</p>
+                            </div>
+                        </div>
+                        <!-- Back -->
+                        <div class="absolute inset-0 bg-emerald-950/90 rounded-xl border border-emerald-500 p-5 flex flex-col justify-center items-center text-center rotate-y-180 backface-hidden">
+                            <i class="fa-solid fa-tree text-3xl text-emerald-300 mb-2"></i>
+                            <h4 class="font-bold text-lg text-emerald-200 mb-2">추론 환경: 따뜻하고 습윤한 늪지대</h4>
+                            <p class="text-xs text-slate-200 leading-relaxed">
+                                고사리가 발견되는 지층은 과거 기온이 따뜻하고 습기가 많은 육상 늪지대 환경이었음을 말해줍니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Coral (산호) -->
+                <div class="perspective-1000 h-72 cursor-pointer" onclick="flipCard(this)">
+                    <div class="relative w-full h-full duration-700 transform-style-3d card-inner">
+                        <!-- Front -->
+                        <div class="absolute inset-0 bg-slate-900 rounded-xl border border-rose-700/60 p-5 flex flex-col justify-between backface-hidden">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded border border-rose-800">해양 시상화석</span>
+                                <span class="text-xs text-slate-400">클릭하여 환경 확인 🔄</span>
+                            </div>
+
+                            <!-- SVG Coral -->
+                            <div class="flex justify-center my-2">
+                                <svg class="w-28 h-28 text-rose-400" viewBox="0 0 100 100">
+                                    <path d="M50,90 Q40,50 20,40 M50,90 Q50,40 50,20 M50,90 Q60,50 80,40 M50,65 Q35,40 30,25 M50,65 Q65,40 70,25" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-rose-300 text-center">산호 (Coral)</h3>
+                                <p class="text-center text-xs text-slate-400 mt-1">고생대 얕은 바다의 대표 자포동물</p>
+                            </div>
+                        </div>
+                        <!-- Back -->
+                        <div class="absolute inset-0 bg-rose-950/90 rounded-xl border border-rose-500 p-5 flex flex-col justify-center items-center text-center rotate-y-180 backface-hidden">
+                            <i class="fa-solid fa-water text-3xl text-rose-300 mb-2"></i>
+                            <h4 class="font-bold text-lg text-rose-200 mb-2">추론 환경: 따뜻하고 얕은 바다</h4>
+                            <p class="text-xs text-slate-200 leading-relaxed">
+                                산호 화석이 발견되는 지층은 수온이 따뜻하고 수심이 얕아 햇빛이 잘 드는 깨끗한 해양 환경이었음을 의미합니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 10: 환경 변화와 생물 변화의 관계 (인터랙티브 슬라이더 연출) -->
+        <section class="bg-paleoCard rounded-2xl p-6 border border-slate-700/60 shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-6">
+                <i class="fa-solid fa-sliders text-teal-400 text-2xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">10. 환경 변화와 생물 변천의 연동 관계</h2>
+                    <p class="text-slate-400 text-xs">타임라인 슬라이더를 조작하여 산소 농도, 대륙 배치, 생물 상호작용의 변천 확인</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Timeline Slider Control -->
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <div class="flex justify-between text-xs font-bold mb-2">
+                        <span class="text-emerald-400">캄브리아기 (5.4억년 전)</span>
+                        <span class="text-cyan-300">석탄기 (3.5억년 전)</span>
+                        <span class="text-red-400">페름기 말 (2.5억년 전)</span>
+                    </div>
+                    <input type="range" id="timelineSlider" min="1" max="3" value="1" step="1" oninput="updateInteractiveTimeline(this.value)" class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-teal-400">
+                </div>
+
+                <!-- Dynamic Dynamic Render Box -->
+                <div id="sliderRenderCard" class="bg-slate-950 p-6 rounded-xl border border-teal-800/50 transition-all duration-500 min-h-[160px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span id="sliderStageBadge" class="px-2.5 py-1 bg-emerald-900 text-emerald-200 text-xs font-bold rounded-full border border-emerald-700">1단계: 캄브리아기 폭발</span>
+                            <span id="sliderO2Text" class="text-xs font-bold text-cyan-400">산소 농도: ~12%</span>
+                        </div>
+                        <h3 id="sliderStageTitle" class="text-lg font-bold text-slate-100 mb-2">해양 생명체의 폭발적 다각화</h3>
+                        <p id="sliderStageDesc" class="text-xs text-slate-300 leading-relaxed">
+                            따뜻한 해수면과 풍부한 대륙붕 환경에서 단단한 껍데기를 가진 삼엽충 등 무척추동물이 대거 출현했습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-10 px-4 mt-16 text-slate-400 text-xs">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-6">
+                <div>
+                    <h3 class="font-extrabold text-sm text-slate-200">5반 5모둠 통합과학 발표 프로젝트</h3>
+                    <p class="text-slate-400 mt-1">모둠원: 서하린, 유서연, 이정은, 전하윤, 홍예진</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-slate-500">주제: 고생대 환경 복원 및 생물 변천 분석</span>
+                </div>
+            </div>
+
+            <!-- References List -->
+            <div>
+                <h4 class="font-bold text-slate-300 mb-2">📚 참고문헌 및 데이터 출처 (References)</h4>
+                <ul class="space-y-1 text-slate-500 text-[11px] list-disc list-inside">
+                    <li>고등학교 통합과학 교과서 (비상교육, 미래엔 지질시대 및 고생대 단원)</li>
+                    <li>한국지질자원연구원(KIGAM) 지질유산 DB - 고생대 생물군 및 화석 검색 시스템</li>
+                    <li>DBpia 학술논문 DB: '페름기 말 대멸종과 시베리아 트랩 화산활동 연관성 연구'</li>
+                    <li>NASA Earth Observatory - Geological Time Scale & Paleoclimate Reconstruction</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. CHART.JS GEOLOGICAL TIME CHART
+        window.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('geologicalTimeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['선캄브리아 시대 (88.2%)', '고생대 (6.3%)', '중생대 (4.0%)', '신생대 (1.5%)'],
+                    datasets: [{
+                        data: [88.2, 6.3, 4.0, 1.5],
+                        backgroundColor: ['#334155', '#38bdf8', '#f59e0b', '#10b981'],
+                        borderWidth: 2,
+                        borderColor: '#0b1120',
+                        hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Initialize Molecule Simulation
+            initMoleculeCanvas();
+        });
+
+        // 2. SECTION 2 GLACIER TOGGLE LOGIC
+        let isIceAge = false;
+        document.getElementById('toggleIceAgeBtn').addEventListener('click', () => {
+            isIceAge = !isIceAge;
+            const sky = document.getElementById('iceSky');
+            const left = document.getElementById('icebergLeft');
+            const center = document.getElementById('icebergCenter');
+            const right = document.getElementById('icebergRight');
+            const sea = document.getElementById('iceSea');
+            const status = document.getElementById('iceStatusText');
+            const btnText = document.getElementById('iceBtnText');
+
+            if (isIceAge) {
+                sky.className = "absolute inset-0 bg-gradient-to-b from-slate-950 via-cyan-950 to-blue-950 transition-colors duration-1000";
+                left.style.transform = "scaleY(1.4)";
+                center.style.transform = "scaleY(1.5)";
+                right.style.transform = "scaleY(1.3)";
+                sea.className = "relative z-20 w-full h-20 bg-gradient-to-b from-cyan-400/80 to-blue-900 transition-colors duration-1000 backdrop-blur-xs flex items-center justify-center";
+                status.innerText = "대규모 빙하기 상태 (기온 급강하 / 해수면 하강)";
+                btnText.innerText = "온난 기후 복원";
+            } else {
+                sky.className = "absolute inset-0 bg-gradient-to-b from-slate-900 via-sky-950 to-blue-900 transition-colors duration-1000";
+                left.style.transform = "scaleY(1)";
+                center.style.transform = "scaleY(1)";
+                right.style.transform = "scaleY(1)";
+                sea.className = "relative z-20 w-full h-20 bg-gradient-to-b from-cyan-600/60 to-blue-950 transition-colors duration-1000 backdrop-blur-xs flex items-center justify-center";
+                status.innerText = "온난한 해양 환경 (기온 높음 / 빙하 축소)";
+                btnText.innerText = "빙하기 확장 연출";
+            }
+        });
+
+        // 3. SECTION 3 ATMOSPHERE MOLECULE CANVAS SIMULATION
+        let canvas, ctx;
+        let molecules = [];
+        let currentAtmoState = 'early';
+
+        function initMoleculeCanvas() {
+            canvas = document.getElementById('moleculeCanvas');
+            if(!canvas) return;
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            setAtmosphere('early');
+            animateMolecules();
+        }
+
+        function resizeCanvas() {
+            if(canvas) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+        }
+
+        function setAtmosphere(state) {
+            currentAtmoState = state;
+            molecules = [];
+            let countCO2 = 15, countO2 = 5, countN2 = 10;
+
+            if (state === 'mid') { // Carboniferous (High O2)
+                countCO2 = 4; countO2 = 25; countN2 = 8;
+                document.getElementById('atmoTitle').innerText = "석탄기 대기 (산소 대폭증)";
+                document.getElementById('atmoDesc').innerText = "육상 대형 양치식물의 활발한 광합성으로 대기 중 산소 농도가 약 35%까지 치솟아 거대 곤충이 등장했습니다.";
+                document.getElementById('o2Level').innerText = "약 35% (역대 최고)";
+                document.getElementById('ozoneLevel').innerText = "매우 두꺼움 (자외선 완벽 차단)";
+                document.getElementById('seaLevel').innerText = "안정적 얕은 습지";
+            } else if (state === 'late') { // Permian End (Volcanic)
+                countCO2 = 28; countO2 = 6; countN2 = 10;
+                document.getElementById('atmoTitle').innerText = "페름기 말 대기 (화산 가스 급증)";
+                document.getElementById('atmoDesc').innerText = "대규모 화산 폭발로 이산화탄소가 급증하고 산소 농도가 급감하여 전 지구적 온난화와 대멸종이 일어났습니다.";
+                document.getElementById('o2Level').innerText = "약 12% 급감";
+                document.getElementById('ozoneLevel').innerText = "파괴 및 산성비";
+                document.getElementById('seaLevel').innerText = "하강 및 해양 산소 결핍";
+            } else { // Early Paleozoic
+                countCO2 = 18; countO2 = 6; countN2 = 10;
+                document.getElementById('atmoTitle').innerText = "고생대 초기 대기";
+                document.getElementById('atmoDesc').innerText = "이산화탄소 온실효과로 기온이 따뜻했습니다. 식물 진화 이전으로 대기 중 산소 농도는 현재보다 낮았습니다.";
+                document.getElementById('o2Level').innerText = "약 12~15%";
+                document.getElementById('ozoneLevel').innerText = "형성 시작 단계";
+                document.getElementById('seaLevel').innerText = "높음 (넓은 대륙붕)";
+            }
+
+            // Populate Molecules
+            for (let i = 0; i < countCO2; i++) molecules.push(createMolecule('#ef4444', 6)); // CO2 Red
+            for (let i = 0; i < countO2; i++) molecules.push(createMolecule('#38bdf8', 5));  // O2 Cyan
+            for (let i = 0; i < countN2; i++) molecules.push(createMolecule('#94a3b8', 4));  // N2 Slate
+        }
+
+        function createMolecule(color, radius) {
+            return {
+                x: Math.random() * (canvas.width || 300),
+                y: Math.random() * (canvas.height || 200),
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                color: color,
+                radius: radius
+            };
+        }
+
+        function animateMolecules() {
+            if(!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            molecules.forEach(m => {
+                m.x += m.vx;
+                m.y += m.vy;
+
+                if (m.x - m.radius < 0 || m.x + m.radius > canvas.width) m.vx *= -1;
+                if (m.y - m.radius < 0 || m.y + m.radius > canvas.height) m.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
+                ctx.fillStyle = m.color;
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animateMolecules);
+        }
+
+        // 4. SECTION 4 CONTINENTAL DRIFT (PANGAEA)
+        function animateDrift(stage) {
+            const contA = document.getElementById('contA');
+            const contB = document.getElementById('contB');
+            const contC = document.getElementById('contC');
+            const badge = document.getElementById('pangaeaBadge');
+
+            if (stage === 'late') {
+                contA.style.transform = "translate(110px, 45px) rotate(15deg)";
+                contB.style.transform = "translate(130px, 45px) rotate(-20deg)";
+                contC.style.transform = "translate(120px, 35px) rotate(5deg)";
+                badge.style.opacity = "1";
+            } else {
+                contA.style.transform = "translate(40px, 32px) rotate(0deg)";
+                contB.style.transform = "translate(240px, 112px) rotate(0deg)";
+                contC.style.transform = "translate(144px, 16px) rotate(0deg)";
+                badge.style.opacity = "0";
+            }
+        }
+
+        // 6. SECTION 6 PLANT GROWTH ANIMATION
+        function growPlant() {
+            const sporeL = document.getElementById('sporeL');
+            const sporeR = document.getElementById('sporeR');
+            
+            sporeL.style.opacity = "0";
+            sporeR.style.opacity = "0";
+
+            setTimeout(() => {
+                sporeL.style.opacity = "1";
+                sporeR.style.opacity = "1";
+            }, 600);
+        }
+
+        // 8. SECTION 8 VOLCANO ERUPTION SIMULATION
+        function triggerVolcanoEruption() {
+            const section = document.getElementById('volcanoSection');
+            const extinction = document.getElementById('extinctionLayer');
+            const glow = document.getElementById('lavaGlow');
+
+            section.classList.add('volcano-active');
+            glow.style.opacity = "1";
+            extinction.style.opacity = "1";
+
+            setTimeout(() => {
+                section.classList.remove('volcano-active');
+            }, 2500);
+        }
+
+        // 9. SECTION 9 CARD FLIP
+        function flipCard(card) {
+            const inner = card.querySelector('.card-inner');
+            inner.classList.toggle('rotate-y-180');
+        }
+
+        // 10. SECTION 10 INTERACTIVE TIMELINE SLIDER
+        function updateInteractiveTimeline(val) {
+            const badge = document.getElementById('sliderStageBadge');
+            const o2Text = document.getElementById('sliderO2Text');
+            const title = document.getElementById('sliderStageTitle');
+            const desc = document.getElementById('sliderStageDesc');
+
+            if (val == 1) {
+                badge.innerText = "1단계: 캄브리아기 폭발";
+                badge.className = "px-2.5 py-1 bg-emerald-900 text-emerald-200 text-xs font-bold rounded-full border border-emerald-700";
+                o2Text.innerText = "산소 농도: ~12%";
+                title.innerText = "해양 생명체의 폭발적 다각화";
+                desc.innerText = "따뜻한 해수면과 풍부한 대륙붕 환경에서 단단한 껍데기를 가진 삼엽충 등 무척추동물이 대거 출현했습니다.";
+            } else if (val == 2) {
+                badge.innerText = "2단계: 석탄기 거대 숲";
+                badge.className = "px-2.5 py-1 bg-cyan-900 text-cyan-200 text-xs font-bold rounded-full border border-cyan-700";
+                o2Text.innerText = "산소 농도: ~35% (치솟음)";
+                title.innerText = "육상 양치식물 숲과 거대 곤충";
+                desc.innerText = "쿡소니아로부터 진화한 양치식물이 육상을 덮으며 산소가 급증했고, 메가네우라(거대 잠자리) 같은 거대 생물체들이 번성했습니다.";
+            } else if (val == 3) {
+                badge.innerText = "3단계: 페름기 말 대멸종";
+                badge.className = "px-2.5 py-1 bg-red-900 text-red-200 text-xs font-bold rounded-full border border-red-700";
+                o2Text.innerText = "산소 농도: ~12% (급감)";
+                title.innerText = "판게아 형성 & 시베리아 화산 대폭발";
+                desc.innerText = "대륙 통합으로 얕은 바다가 줄어든 상태에서 극심한 화산 폭발이 발생해 해양 생물종 95%가 멸종했습니다.";
+            }
+        }
+    </script>
+</body>
+</html>
